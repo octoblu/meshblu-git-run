@@ -17,6 +17,10 @@ MESSAGE_SCHEMA =
 OPTIONS_SCHEMA =
   type: 'object'
   properties:
+    gitRepo:
+      type: 'string'
+      required: true
+      default: 'https://github.com/org/project'
     setup:
       type: 'string'
       required: true
@@ -32,14 +36,14 @@ class Plugin extends EventEmitter
     @messageSchema = MESSAGE_SCHEMA
     @optionsSchema = OPTIONS_SCHEMA
     @commands = {start: @startCommand, stop: @stopCommand}
-    @dir = path.join __dirname, 'tmp'
+    @tmpDir = path.join __dirname, 'tmp'
 
   onMessage: (message) =>
     payload = message.payload;
     command = @commands[payload.command]
     return unless command?
     command (error, stdout) =>
-      if error?
+      if  error?
         @emit 'error', error
         @emit 'message', error: error
         return
@@ -49,7 +53,11 @@ class Plugin extends EventEmitter
   onConfig: (device) =>
     @setOptions device.options
 
-  setOptions: (@options={}) =>
+  setOptions: (options={}) =>
+    @options = options
+    projectDirName = path.basename @options.gitRepo, '.git'
+    @dir = path.join @tmpDir, projectDirName
+
   setUuid: (@uuid={}) =>
 
   startCommand: (callback=->) =>
@@ -59,12 +67,22 @@ class Plugin extends EventEmitter
       @runCommand @options.start, callback
 
   setup: (callback=->) =>
-    mkdirp @dir, (error) =>
+    @setupDirs (error) =>
       return callback error if error?
       @runCommand @options.setup, callback
 
-  runCommand: (command, callback=->) =>
-    child_process.exec command, cwd: @dir, (error, stdout, stderr) =>
+  setupDirs: (callback=->) =>
+    mkdirp @tmpDir, (error) =>
+      return callback error if error?
+      command =  "git clone #{@options.gitRepo}"
+      @runCommand command, @tmpDir, callback
+
+  runCommand: (command, cwd, callback=->) =>
+    if _.isFunction cwd
+      callback = cwd
+      cwd      = @dir
+
+    child_process.exec command, cwd: cwd, (error, stdout, stderr) =>
       if error?
         error.stdout = stdout
         error.stderr = stderr
