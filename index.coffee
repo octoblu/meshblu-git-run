@@ -1,10 +1,11 @@
 'use strict';
-util           = require 'util'
-{EventEmitter} = require 'events'
-debug          = require('debug')('meshblu-git-run')
+_              = require 'lodash'
 child_process  = require 'child_process'
+debug          = require('debug')('meshblu-git-run')
 fs             = require 'fs-extra'
 path           = require 'path'
+util           = require 'util'
+{EventEmitter} = require 'events'
 
 MESSAGE_SCHEMA =
   type: 'object'
@@ -72,15 +73,19 @@ class Plugin extends EventEmitter
       @runCommand @options.setup, callback
 
   setupDirs: (callback=->) =>
-    mkdirp @tmpDir, (error) =>
+    fs.mkdirp @tmpDir, (error) =>
       return callback error if error?
-      command =  "git clone #{@options.gitRepo}"
-      @runCommand command, @tmpDir, callback
+      fs.remove @dir, (error) =>
+        return callback error if error?
+        command =  "git clone #{@options.gitRepo}"
+        @runCommand command, @tmpDir, callback
 
   runCommand: (command, cwd, callback=->) =>
     if _.isFunction cwd
       callback = cwd
       cwd      = @dir
+
+    debug 'run', cwd: cwd, command
 
     child_process.exec command, cwd: cwd, (error, stdout, stderr) =>
       if error?
