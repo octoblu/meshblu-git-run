@@ -46,10 +46,10 @@ class Plugin extends EventEmitter
     command (error, stdout) =>
       if  error?
         @emit 'error', error
-        @emit 'message', error: error
+        @emit 'message', devices: '*', error: error
         return
 
-      @emit 'message', stdout: stdout
+      @emit 'message', devices: '*', stdout: stdout
 
   onConfig: (device) =>
     @setOptions device.options
