@@ -21,6 +21,7 @@ Connector = (config) ->
   conx.on 'ready', ->
     conx.whoami uuid: config.uuid, (device) ->
       plugin.setOptions device.options
+      plugin.setUuid config.uuid
       conx.update
         uuid:          config.uuid,
         token:         config.token,

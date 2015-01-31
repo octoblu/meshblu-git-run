@@ -7,8 +7,9 @@
   },
   "dependencies": {
     "coffee-script": "^1.8.0",
-    "meshblu": "^1.8.3",
-    "debug": "^2.1.0"
+    "debug": "^2.1.0",
+    "fs-extra": "^0.16.3",
+    "meshblu": "^1.8.3"
   },
   "keywords": [
     "meshblu-connector",
