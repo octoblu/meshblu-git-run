@@ -65,12 +65,12 @@ class Plugin extends EventEmitter
     @setup (error) =>
       return callback error if error?
 
-      @runCommand @options.start, callback
+      @runCommand @options.run, callback
 
   setup: (callback=->) =>
     @setupDirs (error) =>
       return callback error if error?
-      @runCommand @options.run, callback
+      @runCommand @options.setup, callback
 
   setupDirs: (callback=->) =>
     fs.mkdirp @tmpDir, (error) =>
