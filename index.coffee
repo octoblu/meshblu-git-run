@@ -43,13 +43,13 @@ class Plugin extends EventEmitter
     payload = message.payload;
     command = @commands[payload.command]
     return unless command?
-    command (error, stdout) =>
+    command (error, stdout, stderr) =>
       if  error?
         @emit 'error', error
         @emit 'message', devices: '*', error: error
         return
 
-      @emit 'message', devices: '*', stdout: stdout
+      @emit 'message', devices: '*', stdout: stdout, stderr
 
   onConfig: (device) =>
     @setOptions device.options
@@ -92,7 +92,7 @@ class Plugin extends EventEmitter
         error.stdout = stdout
         error.stderr = stderr
         return callback error
-      callback null, stdout
+      callback null, stdout, stderr
 
 
 module.exports =
